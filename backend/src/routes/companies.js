@@ -5,6 +5,15 @@ const bronnoy = require('../services/bronnoy');
 const { generateValuation } = require('../services/valuation');
 const prisma = new PrismaClient();
 
+router.get('/search', async (req, res) => {
+  try {
+    const { name } = req.query;
+    if (!name || name.length < 2) return res.json([]);
+    const results = await bronnoy.searchCompany(name);
+    res.json(results);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 router.get('/lookup/:orgNr', async (req, res) => {
   try {
     const data = await bronnoy.fetchCompany(req.params.orgNr);

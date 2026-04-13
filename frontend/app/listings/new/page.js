@@ -9,24 +9,38 @@ export default function NewListingPage() {
   const [step, setStep] = useState(1);
   const [orgNr, setOrgNr] = useState('');
   const [company, setCompany] = useState(null);
-  const [lookupError, setLookupError] = useState('');
-  const [lookupLoading, setLookupLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchTimeout, setSearchTimeoutId] = useState(null);
   const [form, setForm] = useState({ sharesForSale: '', totalShares: '', priceType: 'FIXED', askingPricePerShare: '', description: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const lookupCompany = async () => {
-    setLookupError('');
-    setLookupLoading(true);
-    try {
-      const { data } = await api.get(`/api/companies/lookup/${orgNr.replace(/\s/g, '')}`);
-      setCompany(data);
-      setStep(2);
-    } catch {
-      setLookupError('Fant ikke selskapet. Sjekk org.nr og prøv igjen.');
-    } finally {
-      setLookupLoading(false);
-    }
+  const searchCompanies = (query) => {
+    setSearchQuery(query);
+    if (searchTimeout) clearTimeout(searchTimeout);
+    if (query.length < 2) { setSearchResults([]); return; }
+    const tid = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const { data } = await api.get(`/api/companies/search`, { params: { name: query } });
+        setSearchResults(data);
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+    setSearchTimeoutId(tid);
+  };
+
+  const selectCompany = (result) => {
+    setCompany(result);
+    setOrgNr(result.organisasjonsnummer);
+    setSearchResults([]);
+    setSearchQuery(result.navn);
+    setStep(2);
   };
 
   const submitListing = async () => {
@@ -34,7 +48,7 @@ export default function NewListingPage() {
     setSubmitting(true);
     try {
       const { data } = await api.post('/api/listings', {
-        companyOrgNr: orgNr.replace(/\s/g, ''),
+        companyOrgNr: company?.organisasjonsnummer || orgNr.replace(/\s/g, ''),
         sharesForSale: form.sharesForSale,
         totalShares: form.totalShares,
         priceType: form.priceType,
@@ -66,15 +80,25 @@ export default function NewListingPage() {
         {step === 1 && (
           <div className="card">
             <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Finn selskapet</h2>
-            {lookupError && <div className="alert alert-error">{lookupError}</div>}
-            <div className="form-group">
-              <label className="form-label">Organisasjonsnummer</label>
-              <input className="form-input" placeholder="123 456 789" value={orgNr} onChange={e => setOrgNr(e.target.value)} onKeyDown={e => e.key === 'Enter' && lookupCompany()} />
-              <span className="form-hint">9-sifret org.nr fra Brønnøysundregisteret</span>
+            <div className="form-group" style={{ position: 'relative' }}>
+              <label className="form-label">Søk etter selskapsnavn</label>
+              <input className="form-input" placeholder="Skriv selskapsnavn..." value={searchQuery} onChange={e => searchCompanies(e.target.value)} autoFocus />
+              <span className="form-hint">Søker i Brønnøysundregisteret</span>
+              {searchLoading && <div style={{ fontSize: 13, color: 'var(--gray-400)', marginTop: 4 }}>Søker...</div>}
+              {searchResults.length > 0 && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, background: 'white', border: '1.5px solid var(--gray-200)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-lg)', marginTop: 4, maxHeight: 280, overflowY: 'auto' }}>
+                  {searchResults.map(r => (
+                    <button key={r.organisasjonsnummer} onClick={() => selectCompany(r)} style={{ display: 'block', width: '100%', padding: '10px 14px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', borderBottom: '1px solid var(--gray-100)', fontSize: 14 }} onMouseEnter={e => e.currentTarget.style.background = 'var(--gray-50)'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                      <div style={{ fontWeight: 500 }}>{r.navn}</div>
+                      <div style={{ fontSize: 12, color: 'var(--gray-600)' }}>Org.nr: {r.organisasjonsnummer}{r.naeringskode1?.beskrivelse ? ` · ${r.naeringskode1.beskrivelse}` : ''}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {searchQuery.length >= 2 && !searchLoading && searchResults.length === 0 && (
+                <div style={{ fontSize: 13, color: 'var(--gray-400)', marginTop: 4 }}>Ingen treff</div>
+              )}
             </div>
-            <button className="btn btn-primary btn-full" onClick={lookupCompany} disabled={lookupLoading || orgNr.replace(/\s/g, '').length < 9}>
-              {lookupLoading ? 'Søker...' : 'Søk opp selskap'}
-            </button>
           </div>
         )}
 
@@ -122,7 +146,7 @@ export default function NewListingPage() {
             {error && <div className="alert alert-error">{error}</div>}
             <div style={{ background: 'var(--gray-50)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 20, fontSize: 14 }}>
               <div style={{ marginBottom: 8 }}><b>Selskap:</b> {company?.navn}</div>
-              <div style={{ marginBottom: 8 }}><b>Org.nr:</b> {orgNr}</div>
+              <div style={{ marginBottom: 8 }}><b>Org.nr:</b> {company?.organisasjonsnummer || orgNr}</div>
               <div style={{ marginBottom: 8 }}><b>Aksjer til salgs:</b> {parseInt(form.sharesForSale).toLocaleString('nb-NO')}</div>
               <div style={{ marginBottom: 8 }}><b>Totale aksjer:</b> {parseInt(form.totalShares).toLocaleString('nb-NO')}</div>
               <div style={{ marginBottom: 8 }}><b>Andel:</b> {((form.sharesForSale / form.totalShares) * 100).toFixed(1)}%</div>

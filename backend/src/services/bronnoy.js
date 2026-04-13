@@ -8,7 +8,7 @@ async function fetchCompany(orgNr) {
 }
 
 async function searchCompany(name) {
-  const { data } = await axios.get(`${BASE}/enheter`, { params: { navn: name, size: 5 } });
+  const { data } = await axios.get(`${BASE}/enheter`, { params: { navn: name, size: 10 } });
   return data._embedded?.enheter || [];
 }
 
