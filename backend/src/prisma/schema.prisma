@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum KycStatus     { PENDING VERIFIED REJECTED }
+enum UserRole      { USER ADMIN }
+enum ListingStatus { DRAFT ACTIVE PAUSED SOLD CANCELLED }
+enum PriceType     { FIXED OPEN }
+enum BidStatus     { PENDING ACCEPTED REJECTED EXPIRED WITHDRAWN }
+enum DealStage     { NDA_PENDING DD_ACTIVE NEGOTIATING SIGNING COMPLETED CANCELLED }
+enum DocType       { ANNUAL_REPORT PITCH_DECK CAP_TABLE SHAREHOLDER_AGREEMENT NDA SHARE_PURCHASE_AGREEMENT OTHER }
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  fullName     String
+  phone        String?
+  bankIdPid    String?   @unique
+  googleId     String?   @unique
+  passwordHash String?
+  kycStatus    KycStatus @default(PENDING)
+  role         UserRole  @default(USER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  listings     Listing[]
+  bids         Bid[]
+  dealMembers  DealRoomMember[]
+  messages     DealRoomMessage[]
+}
+
+model Company {
+  id          String    @id @default(uuid())
+  orgNr       String    @unique
+  name        String
+  industry    String?
+  employees   Int?
+  revenue     Decimal?
+  ebitda      Decimal?
+  bronnoyData Json?
+  lastSynced  DateTime?
+  createdAt   DateTime  @default(now())
+  listings    Listing[]
+  valuations  AiValuation[]
+}
+
+model Listing {
+  id                  String        @id @default(uuid())
+  sellerId            String
+  companyId           String
+  sharesForSale       Int
+  totalShares         Int
+  askingPricePerShare Decimal?
+  priceType           PriceType     @default(FIXED)
+  status              ListingStatus @default(DRAFT)
+  description         String?
+  feePercent          Decimal       @default(5.0)
+  publishedAt         DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  seller              User          @relation(fields: [sellerId], references: [id])
+  company             Company       @relation(fields: [companyId], references: [id])
+  bids                Bid[]
+  documents           ListingDocument[]
+  dealRooms           DealRoom[]
+}
+
+model Bid {
+  id            String    @id @default(uuid())
+  listingId     String
+  buyerId       String
+  pricePerShare Decimal
+  sharesWanted  Int
+  status        BidStatus @default(PENDING)
+  message       String?
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  listing       Listing   @relation(fields: [listingId], references: [id])
+  buyer         User      @relation(fields: [buyerId], references: [id])
+  dealRoom      DealRoom?
+}
+
+model DealRoom {
+  id              String    @id @default(uuid())
+  listingId       String
+  acceptedBidId   String?   @unique
+  stage           DealStage @default(NDA_PENDING)
+  ndaSignedSeller Boolean   @default(false)
+  ndaSignedBuyer  Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  listing         Listing   @relation(fields: [listingId], references: [id])
+  acceptedBid     Bid?      @relation(fields: [acceptedBidId], references: [id])
+  members         DealRoomMember[]
+  messages        DealRoomMessage[]
+  documents       DealDocument[]
+  transaction     Transaction?
+}
+
+model DealRoomMember {
+  id         String   @id @default(uuid())
+  dealRoomId String
+  userId     String
+  role       String
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+  @@unique([dealRoomId, userId])
+}
+
+model DealRoomMessage {
+  id         String   @id @default(uuid())
+  dealRoomId String
+  senderId   String
+  content    String
+  sentAt     DateTime @default(now())
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id])
+  sender     User     @relation(fields: [senderId], references: [id])
+}
+
+model ListingDocument {
+  id        String   @id @default(uuid())
+  listingId String
+  docType   DocType
+  fileUrl   String
+  fileName  String
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  listing   Listing  @relation(fields: [listingId], references: [id])
+}
+
+model DealDocument {
+  id         String   @id @default(uuid())
+  dealRoomId String
+  docType    DocType
+  fileUrl    String
+  fileName   String
+  signed     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id])
+}
+
+model AiValuation {
+  id             String   @id @default(uuid())
+  companyId      String
+  estimatedValue Decimal
+  lowRange       Decimal
+  highRange      Decimal
+  startScore     Int
+  methodology    Json
+  generatedAt    DateTime @default(now())
+  company        Company  @relation(fields: [companyId], references: [id])
+}
+
+model Transaction {
+  id                String    @id @default(uuid())
+  dealRoomId        String    @unique
+  totalValue        Decimal
+  platformFeeSeller Decimal
+  platformFeeBuyer  Decimal
+  status            String    @default("PENDING")
+  stripePaymentId   String?
+  completedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  dealRoom          DealRoom  @relation(fields: [dealRoomId], references: [id])
+}
