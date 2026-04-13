@@ -199,6 +199,22 @@ model AiValuation {
   company        Company  @relation(fields: [companyId], references: [id])
 }
 
+model Shareholder {
+  id             String   @id @default(uuid())
+  orgNr          String
+  companyName    String
+  shareClass     String?
+  name           String
+  birthYearOrOrg String?
+  postalInfo     String?
+  countryCode    String?
+  shares         Int
+  totalShares    Int
+  year           Int      @default(2024)
+  createdAt      DateTime @default(now())
+  @@index([orgNr])
+}
+
 model Transaction {
   id                String    @id @default(uuid())
   dealRoomId        String    @unique

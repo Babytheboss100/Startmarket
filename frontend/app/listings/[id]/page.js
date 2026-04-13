@@ -14,9 +14,15 @@ export default function ListingDetailPage() {
   const [bidLoading, setBidLoading] = useState(false);
   const [bidSuccess, setBidSuccess] = useState('');
   const [bidError, setBidError] = useState('');
+  const [shareholders, setShareholders] = useState([]);
 
   useEffect(() => {
-    api.get(`/api/listings/${id}`).then(r => setListing(r.data)).catch(console.error).finally(() => setLoading(false));
+    api.get(`/api/listings/${id}`).then(r => {
+      setListing(r.data);
+      if (r.data?.company?.orgNr) {
+        api.get(`/api/companies/${r.data.company.orgNr}/shareholders`).then(s => setShareholders(s.data)).catch(() => {});
+      }
+    }).catch(console.error).finally(() => setLoading(false));
   }, [id]);
 
   const totalBid = (parseFloat(bidForm.pricePerShare) || 0) * (parseInt(bidForm.sharesWanted) || 0);
@@ -66,6 +72,31 @@ export default function ListingDetailPage() {
               <div className="stat-box"><div className="stat-label">Bud</div><div className="stat-value">{listing._count?.bids || 0}</div></div>
             </div>
           </div>
+
+          {/* Shareholders */}
+          {shareholders.length > 0 && (
+            <div className="card" style={{ marginBottom: 20 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Aksjonærer</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: '2px solid var(--gray-200)', textAlign: 'left' }}>
+                    <th style={{ padding: '6px 8px' }}>Navn</th>
+                    <th style={{ padding: '6px 8px', textAlign: 'right' }}>Aksjer</th>
+                    <th style={{ padding: '6px 8px', textAlign: 'right' }}>Andel</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shareholders.map((sh, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid var(--gray-100)' }}>
+                      <td style={{ padding: '6px 8px' }}>{sh.name}</td>
+                      <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{sh.shares.toLocaleString('nb-NO')}</td>
+                      <td style={{ padding: '6px 8px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{sh.totalShares > 0 ? ((sh.shares / sh.totalShares) * 100).toFixed(1) : '—'}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* StartScore card */}
           {score && (

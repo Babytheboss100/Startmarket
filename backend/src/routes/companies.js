@@ -47,4 +47,14 @@ router.post('/:orgNr/valuate', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+router.get('/:orgNr/shareholders', async (req, res) => {
+  try {
+    const shareholders = await prisma.shareholder.findMany({
+      where: { orgNr: req.params.orgNr.replace(/\s/g, '') },
+      orderBy: { shares: 'desc' }
+    });
+    res.json(shareholders);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 module.exports = router;
