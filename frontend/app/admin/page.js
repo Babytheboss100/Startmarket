@@ -12,6 +12,9 @@ export default function AdminPage() {
   const [users, setUsers] = useState([]);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [scoreEdit, setScoreEdit] = useState(null);
+  const [scoreForm, setScoreForm] = useState({ startScore: '', scoreExplanation: '' });
+  const [scoreSaving, setScoreSaving] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn()) { router.push('/auth/login'); return; }
@@ -44,6 +47,27 @@ export default function AdminPage() {
       setUsers(users.map(u => u.id === userId ? { ...u, kycStatus } : u));
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const openScoreEdit = (listingId, existing) => {
+    setScoreEdit(listingId);
+    setScoreForm({
+      startScore: existing?.startScore || '',
+      scoreExplanation: existing?.methodology?.scoreExplanation || ''
+    });
+  };
+
+  const saveScore = async (listingId) => {
+    setScoreSaving(true);
+    try {
+      await api.post(`/api/admin/listings/${listingId}/score`, scoreForm);
+      setScoreEdit(null);
+      loadData();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setScoreSaving(false);
     }
   };
 
@@ -137,21 +161,45 @@ export default function AdminPage() {
                   <th style={{ padding: '8px 12px' }}>Selger</th>
                   <th style={{ padding: '8px 12px' }}>Aksjer</th>
                   <th style={{ padding: '8px 12px' }}>Status</th>
+                  <th style={{ padding: '8px 12px' }}>Score</th>
                   <th style={{ padding: '8px 12px' }}>Bud</th>
                   <th style={{ padding: '8px 12px' }}>Opprettet</th>
+                  <th style={{ padding: '8px 12px' }}>Handlinger</th>
                 </tr>
               </thead>
               <tbody>
-                {listings.map(l => (
-                  <tr key={l.id} style={{ borderBottom: '1px solid var(--gray-100)' }}>
-                    <td style={{ padding: '8px 12px', fontWeight: 500 }}>{l.company?.name}</td>
-                    <td style={{ padding: '8px 12px', color: 'var(--gray-600)' }}>{l.seller?.fullName}</td>
-                    <td style={{ padding: '8px 12px' }}>{l.sharesForSale.toLocaleString('nb-NO')}</td>
-                    <td style={{ padding: '8px 12px' }}><span className={`badge badge-${l.status?.toLowerCase()}`}>{l.status}</span></td>
-                    <td style={{ padding: '8px 12px' }}>{l._count?.bids || 0}</td>
-                    <td style={{ padding: '8px 12px', color: 'var(--gray-600)' }}>{new Date(l.createdAt).toLocaleDateString('nb-NO')}</td>
-                  </tr>
-                ))}
+                {listings.map(l => {
+                  const val = l.company?.valuations?.[0];
+                  const score = val?.startScore || val?.methodology?.startScore;
+                  const scoreColor = score >= 70 ? '#16a34a' : score >= 40 ? '#2563eb' : score ? '#d97706' : 'var(--gray-400)';
+                  return (
+                    <tr key={l.id} style={{ borderBottom: '1px solid var(--gray-100)', verticalAlign: scoreEdit === l.id ? 'top' : 'middle' }}>
+                      <td style={{ padding: '8px 12px', fontWeight: 500 }}>{l.company?.name}</td>
+                      <td style={{ padding: '8px 12px', color: 'var(--gray-600)' }}>{l.seller?.fullName}</td>
+                      <td style={{ padding: '8px 12px' }}>{l.sharesForSale.toLocaleString('nb-NO')}</td>
+                      <td style={{ padding: '8px 12px' }}><span className={`badge badge-${l.status?.toLowerCase()}`}>{l.status}</span></td>
+                      <td style={{ padding: '8px 12px' }}>
+                        {score ? <span style={{ fontWeight: 700, color: scoreColor }}>{score}</span> : <span style={{ color: 'var(--gray-400)' }}>—</span>}
+                      </td>
+                      <td style={{ padding: '8px 12px' }}>{l._count?.bids || 0}</td>
+                      <td style={{ padding: '8px 12px', color: 'var(--gray-600)' }}>{new Date(l.createdAt).toLocaleDateString('nb-NO')}</td>
+                      <td style={{ padding: '8px 12px' }}>
+                        {scoreEdit === l.id ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 200 }}>
+                            <input className="form-input" type="number" min="1" max="100" placeholder="Score 1-100" value={scoreForm.startScore} onChange={e => setScoreForm({ ...scoreForm, startScore: e.target.value })} style={{ padding: '6px 10px', fontSize: 13 }} />
+                            <textarea className="form-input" rows={2} placeholder="Forklaring..." value={scoreForm.scoreExplanation} onChange={e => setScoreForm({ ...scoreForm, scoreExplanation: e.target.value })} style={{ padding: '6px 10px', fontSize: 13 }} />
+                            <div style={{ display: 'flex', gap: 4 }}>
+                              <button className="btn btn-sm btn-primary" style={{ padding: '4px 10px', fontSize: 12 }} disabled={scoreSaving || !scoreForm.startScore} onClick={() => saveScore(l.id)}>{scoreSaving ? 'Lagrer...' : 'Lagre'}</button>
+                              <button className="btn btn-sm btn-outline" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setScoreEdit(null)}>Avbryt</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button className="btn btn-sm btn-outline" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => openScoreEdit(l.id, val)}>{score ? 'Endre Score' : 'Sett Score'}</button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
