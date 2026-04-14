@@ -14,6 +14,7 @@ export default function NewListingPage() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchTimeout, setSearchTimeoutId] = useState(null);
   const [form, setForm] = useState({ sharesForSale: '', totalShares: '', priceType: 'FIXED', askingPricePerShare: '', description: '' });
+  const [shareholders, setShareholders] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -35,11 +36,20 @@ export default function NewListingPage() {
     setSearchTimeoutId(tid);
   };
 
-  const selectCompany = (result) => {
+  const selectCompany = async (result) => {
     setCompany(result);
     setOrgNr(result.organisasjonsnummer);
     setSearchResults([]);
     setSearchQuery(result.navn);
+    try {
+      const { data } = await api.get(`/api/companies/${result.organisasjonsnummer}/shareholders`);
+      setShareholders(data);
+      if (data.length > 0 && data[0].totalShares > 0) {
+        setForm(f => ({ ...f, totalShares: String(data[0].totalShares) }));
+      }
+    } catch {
+      setShareholders([]);
+    }
     setStep(2);
   };
 
@@ -115,7 +125,31 @@ export default function NewListingPage() {
             <div className="form-group">
               <label className="form-label">Totalt antall aksjer i selskapet</label>
               <input className="form-input" type="number" required value={form.totalShares} onChange={e => setForm({ ...form, totalShares: e.target.value })} />
+              {shareholders.length > 0 && form.totalShares && <span className="form-hint">Hentet fra aksjonærregisteret</span>}
             </div>
+            {shareholders.length > 0 && (
+              <div style={{ background: 'var(--gray-50)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 16 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Aksjonærer ({shareholders.length})</div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1.5px solid var(--gray-200)', textAlign: 'left' }}>
+                      <th style={{ padding: '4px 6px' }}>Navn</th>
+                      <th style={{ padding: '4px 6px', textAlign: 'right' }}>Aksjer</th>
+                      <th style={{ padding: '4px 6px', textAlign: 'right' }}>Andel</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {shareholders.map((sh, i) => (
+                      <tr key={i} style={{ borderBottom: '1px solid var(--gray-100)' }}>
+                        <td style={{ padding: '4px 6px', color: 'var(--gray-700)' }}>{sh.name}</td>
+                        <td style={{ padding: '4px 6px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{sh.shares.toLocaleString('nb-NO')}</td>
+                        <td style={{ padding: '4px 6px', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{sh.totalShares > 0 ? ((sh.shares / sh.totalShares) * 100).toFixed(1) : '—'}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
             <div className="form-group">
               <label className="form-label">Prismodell</label>
               <select className="form-input" value={form.priceType} onChange={e => setForm({ ...form, priceType: e.target.value })}>
