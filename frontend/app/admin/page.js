@@ -71,6 +71,16 @@ export default function AdminPage() {
     }
   };
 
+  const togglePublish = async (listingId, currentStatus) => {
+    try {
+      const newStatus = currentStatus === 'ACTIVE' ? 'DRAFT' : 'ACTIVE';
+      await api.patch(`/api/admin/listings/${listingId}`, { status: newStatus, ...(newStatus === 'ACTIVE' ? { publishedAt: new Date().toISOString() } : {}) });
+      setListings(listings.map(l => l.id === listingId ? { ...l, status: newStatus } : l));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   if (loading) return <><Navbar /><div className="container" style={{ padding: 40, textAlign: 'center' }}>Laster admin...</div></>;
 
   return (
@@ -194,7 +204,10 @@ export default function AdminPage() {
                             </div>
                           </div>
                         ) : (
-                          <button className="btn btn-sm btn-outline" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => openScoreEdit(l.id, val)}>{score ? 'Endre Score' : 'Sett Score'}</button>
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            <button className="btn btn-sm btn-outline" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => openScoreEdit(l.id, val)}>{score ? 'Endre Score' : 'Sett Score'}</button>
+                            <button className="btn btn-sm" style={{ padding: '4px 10px', fontSize: 12, background: l.status === 'ACTIVE' ? 'var(--warning)' : 'var(--success)', color: 'white' }} onClick={() => togglePublish(l.id, l.status)}>{l.status === 'ACTIVE' ? 'Avpubliser' : 'Publiser'}</button>
+                          </div>
                         )}
                       </td>
                     </tr>
