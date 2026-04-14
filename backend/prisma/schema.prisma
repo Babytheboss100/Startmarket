@@ -77,18 +77,29 @@ model User {
 }
 
 model Company {
-  id          String    @id @default(uuid())
-  orgNr       String    @unique
-  name        String
-  industry    String?
-  employees   Int?
-  revenue     Decimal?
-  ebitda      Decimal?
-  bronnoyData Json?
-  lastSynced  DateTime?
-  createdAt   DateTime  @default(now())
-  listings    Listing[]
-  valuations  AiValuation[]
+  id              String    @id @default(uuid())
+  orgNr           String    @unique
+  name            String
+  industry        String?
+  employees       Int?
+  revenue         Decimal?
+  ebitda          Decimal?
+  foundedYear     Int?
+  orgForm         String?
+  vatRegistered   Boolean?
+  isBankrupt      Boolean?
+  address         String?
+  latestRevenue   Decimal?
+  latestProfit    Decimal?
+  latestEquity    Decimal?
+  latestDebt      Decimal?
+  accountingYear  Int?
+  boardMembers    Json?
+  bronnoyData     Json?
+  lastSynced      DateTime?
+  createdAt       DateTime  @default(now())
+  listings        Listing[]
+  valuations      AiValuation[]
 }
 
 model Listing {
@@ -208,8 +219,8 @@ model Shareholder {
   birthYearOrOrg String?
   postalInfo     String?
   countryCode    String?
-  shares         Int
-  totalShares    Int
+  shares         BigInt
+  totalShares    BigInt
   year           Int      @default(2024)
   createdAt      DateTime @default(now())
   @@index([orgNr])

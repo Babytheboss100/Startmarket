@@ -60,17 +60,64 @@ export default function ListingDetailPage() {
         {/* Left column */}
         <div>
           <div className="card" style={{ marginBottom: 20 }}>
-            <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>{company?.name}</h1>
-            <p style={{ color: 'var(--gray-600)', fontSize: 14, marginBottom: 16 }}>{company?.industry || 'Ingen bransje'} &middot; Org.nr: {company?.orgNr}</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+              <h1 style={{ fontSize: 28, fontWeight: 700 }}>{company?.name}</h1>
+              {company?.isBankrupt && <span className="badge badge-cancelled">Konkurs/Avvikling</span>}
+            </div>
+            <p style={{ color: 'var(--gray-600)', fontSize: 14, marginBottom: 4 }}>
+              {company?.industry || 'Ingen bransje'} &middot; Org.nr: {company?.orgNr}
+              {company?.orgForm ? ` · ${company.orgForm}` : ''}
+            </p>
+            {company?.address && <p style={{ color: 'var(--gray-400)', fontSize: 13, marginBottom: 12 }}>{company.address}</p>}
             {listing.description && <p style={{ color: 'var(--gray-700)', lineHeight: 1.7, marginBottom: 16 }}>{listing.description}</p>}
-            <div className="stat-grid">
+
+            {/* Listing stats */}
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-600)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>Aksjehandel</div>
+            <div className="stat-grid" style={{ marginBottom: 16 }}>
               <div className="stat-box"><div className="stat-label">Aksjer til salgs</div><div className="stat-value">{listing.sharesForSale.toLocaleString('nb-NO')}</div></div>
               <div className="stat-box"><div className="stat-label">Totale aksjer</div><div className="stat-value">{listing.totalShares.toLocaleString('nb-NO')}</div></div>
               <div className="stat-box"><div className="stat-label">Pris/aksje</div><div className="stat-value">{listing.askingPricePerShare ? `NOK ${Number(listing.askingPricePerShare).toLocaleString('nb-NO')}` : 'Åpen'}</div></div>
               <div className="stat-box"><div className="stat-label">Andel</div><div className="stat-value">{((listing.sharesForSale / listing.totalShares) * 100).toFixed(1)}%</div></div>
-              {company?.employees && <div className="stat-box"><div className="stat-label">Ansatte</div><div className="stat-value">{company.employees}</div></div>}
               <div className="stat-box"><div className="stat-label">Bud</div><div className="stat-value">{listing._count?.bids || 0}</div></div>
             </div>
+
+            {/* Company details */}
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-600)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>Selskapsinfo</div>
+            <div className="stat-grid" style={{ marginBottom: 16 }}>
+              {company?.foundedYear && <div className="stat-box"><div className="stat-label">Stiftet</div><div className="stat-value">{company.foundedYear}</div></div>}
+              {company?.employees != null && <div className="stat-box"><div className="stat-label">Ansatte</div><div className="stat-value">{company.employees}</div></div>}
+              {company?.orgForm && <div className="stat-box"><div className="stat-label">Org.form</div><div className="stat-value" style={{ fontSize: 13 }}>{company.orgForm}</div></div>}
+              <div className="stat-box"><div className="stat-label">MVA-registrert</div><div className="stat-value">{company?.vatRegistered ? 'Ja' : 'Nei'}</div></div>
+            </div>
+
+            {/* Financials */}
+            {(company?.latestRevenue != null || company?.latestProfit != null) && (
+              <>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-600)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>
+                  Regnskap{company?.accountingYear ? ` ${company.accountingYear}` : ''}
+                </div>
+                <div className="stat-grid">
+                  {company?.latestRevenue != null && <div className="stat-box"><div className="stat-label">Omsetning</div><div className="stat-value">NOK {Number(company.latestRevenue).toLocaleString('nb-NO')}</div></div>}
+                  {company?.latestProfit != null && <div className="stat-box"><div className="stat-label">Resultat</div><div className="stat-value" style={{ color: Number(company.latestProfit) >= 0 ? 'var(--success)' : 'var(--danger)' }}>NOK {Number(company.latestProfit).toLocaleString('nb-NO')}</div></div>}
+                  {company?.latestEquity != null && <div className="stat-box"><div className="stat-label">Egenkapital</div><div className="stat-value">NOK {Number(company.latestEquity).toLocaleString('nb-NO')}</div></div>}
+                  {company?.latestDebt != null && <div className="stat-box"><div className="stat-label">Gjeld</div><div className="stat-value">NOK {Number(company.latestDebt).toLocaleString('nb-NO')}</div></div>}
+                </div>
+              </>
+            )}
+
+            {/* Board members */}
+            {company?.boardMembers && company.boardMembers.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-600)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 8 }}>Roller</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {company.boardMembers.map((m, i) => (
+                    <span key={i} style={{ fontSize: 12, background: 'var(--gray-50)', border: '1px solid var(--gray-200)', borderRadius: 'var(--radius)', padding: '4px 10px' }}>
+                      <span style={{ fontWeight: 500 }}>{m.name}</span> <span style={{ color: 'var(--gray-400)' }}>{m.role}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Shareholders */}

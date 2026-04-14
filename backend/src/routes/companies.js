@@ -16,24 +16,57 @@ router.get('/search', async (req, res) => {
 
 router.get('/lookup/:orgNr', async (req, res) => {
   try {
-    const data = await bronnoy.fetchCompany(req.params.orgNr);
+    const data = await bronnoy.fetchFullCompanyData(req.params.orgNr);
     res.json(data);
   } catch { res.status(404).json({ error: 'Fant ikke selskapet i Brønnøysundregisteret' }); }
 });
 
 router.get('/:orgNr', async (req, res) => {
   try {
+    const orgNr = req.params.orgNr.replace(/\s/g, '');
     let company = await prisma.company.findUnique({
-      where: { orgNr: req.params.orgNr },
+      where: { orgNr },
       include: { valuations: { orderBy: { generatedAt: 'desc' }, take: 1 }, listings: { where: { status: 'ACTIVE' } } }
     });
-    if (!company) {
-      const data = await bronnoy.fetchCompany(req.params.orgNr);
-      company = await prisma.company.create({
-        data: { orgNr: req.params.orgNr, name: data.navn, industry: data.naeringskode1?.beskrivelse, employees: data.antallAnsatte, bronnoyData: data, lastSynced: new Date() },
-        include: { valuations: true, listings: true }
-      });
+
+    // Create or refresh if not synced in last 24h
+    const stale = !company?.lastSynced || (Date.now() - company.lastSynced.getTime() > 24 * 60 * 60 * 1000);
+    if (!company || stale) {
+      const full = await bronnoy.fetchFullCompanyData(orgNr);
+      const companyData = {
+        orgNr,
+        name: full.name,
+        industry: full.industry,
+        employees: full.employees,
+        foundedYear: full.foundedYear,
+        orgForm: full.orgForm,
+        vatRegistered: full.vatRegistered,
+        isBankrupt: full.isBankrupt,
+        address: full.address,
+        latestRevenue: full.latestRevenue,
+        latestProfit: full.latestProfit,
+        latestEquity: full.latestEquity,
+        latestDebt: full.latestDebt,
+        accountingYear: full.accountingYear,
+        boardMembers: full.boardMembers,
+        bronnoyData: full.bronnoyData,
+        lastSynced: new Date()
+      };
+
+      if (company) {
+        company = await prisma.company.update({
+          where: { orgNr },
+          data: companyData,
+          include: { valuations: { orderBy: { generatedAt: 'desc' }, take: 1 }, listings: { where: { status: 'ACTIVE' } } }
+        });
+      } else {
+        company = await prisma.company.create({
+          data: companyData,
+          include: { valuations: { orderBy: { generatedAt: 'desc' }, take: 1 }, listings: { where: { status: 'ACTIVE' } } }
+        });
+      }
     }
+
     res.json(company);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -53,7 +86,7 @@ router.get('/:orgNr/shareholders', async (req, res) => {
       where: { orgNr: req.params.orgNr.replace(/\s/g, '') },
       orderBy: { shares: 'desc' }
     });
-    res.json(shareholders);
+    res.json(shareholders.map(s => ({ ...s, shares: Number(s.shares), totalShares: Number(s.totalShares) })));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
