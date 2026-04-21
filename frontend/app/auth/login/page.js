@@ -34,7 +34,7 @@ export default function LoginPage() {
       <div style={{ minHeight: 'calc(100vh - 60px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div className="card" style={{ width: '100%', maxWidth: 420 }}>
           <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Logg inn</h1>
-          <p style={{ color: 'var(--gray-600)', fontSize: 14, marginBottom: 24 }}>Velkommen tilbake til StartMarket</p>
+          <p style={{ color: 'var(--gray-600)', fontSize: 14, marginBottom: 24 }}>Velkommen tilbake til BREEDZ Marketplace</p>
           {error && <div className="alert alert-error">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="form-group">

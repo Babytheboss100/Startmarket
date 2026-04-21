@@ -145,13 +145,13 @@ export default function ListingDetailPage() {
             </div>
           )}
 
-          {/* StartScore card */}
+          {/* BreedzScore card */}
           {score && (
-            <div className="card" style={{ marginBottom: 20 }}>
+            <div className="card glow-border" style={{ marginBottom: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
                 <div style={{ width: 48, height: 48, borderRadius: 12, background: scoreColor + '15', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 800, color: scoreColor }}>{score}</div>
                 <div>
-                  <div style={{ fontWeight: 600, fontSize: 16 }}>StartScore</div>
+                  <div style={{ fontWeight: 600, fontSize: 16 }}>BreedzScore</div>
                   <div style={{ fontSize: 13, color: 'var(--gray-600)' }}>{score >= 70 ? 'Sterk posisjon' : score >= 40 ? 'God posisjon' : 'Gjennomsnitt'}</div>
                 </div>
               </div>
