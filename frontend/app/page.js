@@ -101,6 +101,9 @@ export default function Home() {
       <footer style={{ background: '#1A2B5C', color: 'rgba(255,255,255,0.72)', padding: '40px 0', textAlign: 'center', fontSize: 14 }}>
         <div className="container">
           <p>Help Holding AS &ndash; BREEDZ Marketplace</p>
+          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginTop: 16, maxWidth: 780, margin: '16px auto 0', lineHeight: 1.55 }}>
+            BREEDZ Marketplace tilbyr kun informasjons- og markedsplasstjenester. Dette er ikke investeringsrådgivning. Konsulter en autorisert rådgiver før du tar investeringsbeslutninger.
+          </p>
         </div>
       </footer>
     </>
