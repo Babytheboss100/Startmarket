@@ -130,6 +130,7 @@ export default function NewListingPage() {
             {shareholders.length > 0 && (
               <div style={{ background: 'var(--gray-50)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 16 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Aksjonærer ({shareholders.length})</div>
+                <div className="table-scroll">
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
                     <tr style={{ borderBottom: '1.5px solid var(--gray-200)', textAlign: 'left' }}>
@@ -148,6 +149,7 @@ export default function NewListingPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             )}
             <div className="form-group">

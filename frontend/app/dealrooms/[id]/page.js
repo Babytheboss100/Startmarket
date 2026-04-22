@@ -64,9 +64,9 @@ export default function DealRoomPage() {
   return (
     <>
       <Navbar />
-      <div className="container" style={{ padding: '32px 24px', display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
+      <div className="container dealroom-2col" style={{ padding: '32px 24px' }}>
         {/* Left - Chat */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 140px)' }}>
+        <div className="card dealroom-chat" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 140px)' }}>
           <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 4 }}>
             Deal Room &ndash; {room.listing?.company?.name}
           </h2>

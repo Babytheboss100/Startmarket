@@ -56,7 +56,7 @@ export default function ListingDetailPage() {
   return (
     <>
       <Navbar />
-      <div className="container" style={{ padding: '32px 24px', display: 'grid', gridTemplateColumns: '1fr 380px', gap: 32, alignItems: 'start' }}>
+      <div className="container detail-2col" style={{ padding: '32px 24px' }}>
         {/* Left column */}
         <div>
           <div className="card" style={{ marginBottom: 20 }}>
@@ -124,6 +124,7 @@ export default function ListingDetailPage() {
           {shareholders.length > 0 && (
             <div className="card" style={{ marginBottom: 20 }}>
               <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>Aksjonærer</h3>
+              <div className="table-scroll">
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--gray-200)', textAlign: 'left' }}>
@@ -142,6 +143,7 @@ export default function ListingDetailPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
 
@@ -186,7 +188,7 @@ export default function ListingDetailPage() {
         </div>
 
         {/* Right column - Bid form */}
-        <div style={{ position: 'sticky', top: 80 }}>
+        <div className="detail-aside" style={{ position: 'sticky', top: 80 }}>
           <div className="card">
             <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Legg inn bud</h3>
             {!isLoggedIn() ? (

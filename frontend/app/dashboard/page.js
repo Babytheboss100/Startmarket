@@ -38,7 +38,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+        <div className="dashboard-grid">
           {/* My Listings */}
           <div className="card">
             <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>Mine listings</h2>

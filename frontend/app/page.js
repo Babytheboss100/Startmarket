@@ -7,9 +7,9 @@ export default function Home() {
     <>
       <Navbar />
       {/* Hero */}
-      <section style={{ background: 'linear-gradient(135deg, #1A2B5C 0%, #243B7A 60%, #2C4FA3 100%)', color: 'white', padding: '96px 0 80px' }}>
+      <section style={{ background: 'linear-gradient(135deg, #1A2B5C 0%, #243B7A 60%, #2C4FA3 100%)', color: 'white', padding: 'clamp(56px, 10vw, 96px) 0 clamp(48px, 8vw, 80px)' }}>
         <div className="container" style={{ textAlign: 'center', maxWidth: 840 }}>
-          <h1 style={{ fontSize: 52, fontWeight: 600, lineHeight: 1.05, marginBottom: 20, color: 'white' }}>
+          <h1 style={{ fontSize: 'clamp(34px, 7vw, 52px)', fontWeight: 600, lineHeight: 1.08, marginBottom: 20, color: 'white' }}>
             Kjøp og selg<br />
             <span style={{
               background: 'linear-gradient(135deg, #C7B6FF 0%, #8FE8FF 100%)',
@@ -19,7 +19,7 @@ export default function Home() {
               color: 'transparent'
             }}>unoterte aksjer</span>
           </h1>
-          <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.72)', marginBottom: 36, maxWidth: 600, margin: '0 auto 36px' }}>
+          <p style={{ fontSize: 'clamp(15px, 2.2vw, 18px)', color: 'rgba(255,255,255,0.72)', marginBottom: 36, maxWidth: 600, margin: '0 auto 36px' }}>
             BREEDZ Marketplace — Norges markedsplass for handel av aksjer i unoterte selskaper. AI-drevet verdivurdering, sikre Deal Rooms og transparent prisingsmodell.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -32,7 +32,7 @@ export default function Home() {
       {/* Stats bar */}
       <section style={{ padding: '32px 0' }}>
         <div className="container">
-          <div className="card glow-border" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, textAlign: 'center', padding: '28px 36px' }}>
+          <div className="card glow-border landing-stats-bar" style={{ padding: '28px 24px' }}>
             {[
               { label: 'Under 1M', value: '5% per side' },
               { label: 'Over 1M', value: '3% per side' },
@@ -51,7 +51,7 @@ export default function Home() {
       {/* Features */}
       <section style={{ padding: '64px 0' }}>
         <div className="container">
-          <h2 style={{ fontSize: 36, fontWeight: 600, textAlign: 'center', marginBottom: 40, color: 'var(--navy)' }}>Slik fungerer det</h2>
+          <h2 style={{ fontSize: 'clamp(26px, 4.5vw, 36px)', fontWeight: 600, textAlign: 'center', marginBottom: 40, color: 'var(--navy)' }}>Slik fungerer det</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 20 }}>
             {[
               { title: 'List aksjer', desc: 'Opprett en annonse med org.nr. Vi henter selskapsinformasjon automatisk fra Brønnøysundregisteret.' },
@@ -72,8 +72,8 @@ export default function Home() {
       {/* Pricing */}
       <section style={{ padding: '64px 0' }}>
         <div className="container">
-          <h2 style={{ fontSize: 36, fontWeight: 600, textAlign: 'center', marginBottom: 40, color: 'var(--navy)' }}>Enkel og transparent prising</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24, maxWidth: 700, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 'clamp(26px, 4.5vw, 36px)', fontWeight: 600, textAlign: 'center', marginBottom: 40, color: 'var(--navy)' }}>Enkel og transparent prising</h2>
+          <div className="landing-pricing-grid">
             <div className="card glow-border" style={{ textAlign: 'center', padding: 36 }}>
               <div style={{ fontSize: 12, color: 'var(--gray-600)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Under NOK 1 000 000</div>
               <div style={{ fontSize: 56, fontWeight: 700, background: 'linear-gradient(135deg, #8B7FD8 0%, #2C4FA3 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent', color: 'transparent' }}>5%</div>
@@ -91,7 +91,7 @@ export default function Home() {
       {/* CTA */}
       <section style={{ background: 'linear-gradient(135deg, #8B7FD8 0%, #2C4FA3 100%)', padding: '72px 0' }}>
         <div className="container" style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: 36, fontWeight: 600, color: 'white', marginBottom: 16 }}>Klar til å handle unoterte aksjer?</h2>
+          <h2 style={{ fontSize: 'clamp(24px, 4.5vw, 36px)', fontWeight: 600, color: 'white', marginBottom: 16 }}>Klar til å handle unoterte aksjer?</h2>
           <p style={{ color: 'rgba(255,255,255,0.82)', fontSize: 16, marginBottom: 32 }}>Opprett en gratis konto og kom i gang på minutter.</p>
           <Link href="/auth/register"><button className="btn" style={{ background: 'white', color: 'var(--royal)', padding: '14px 36px', fontSize: 16, fontWeight: 600 }}>Opprett konto</button></Link>
         </div>

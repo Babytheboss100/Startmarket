@@ -100,7 +100,7 @@ export default function AdminPage() {
 
         {/* Stats */}
         {tab === 'stats' && stats && (
-          <div className="stat-grid" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
+          <div className="admin-stats-grid">
             <div className="card" style={{ textAlign: 'center' }}>
               <div className="stat-label">Brukere</div>
               <div style={{ fontSize: 28, fontWeight: 700 }}>{stats.users}</div>
