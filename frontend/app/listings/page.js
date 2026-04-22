@@ -4,27 +4,16 @@ import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import api from '../../lib/api';
 
-function ScoreBadge({ score }) {
-  if (!score && score !== 0) return null;
-  const color = score >= 70 ? '#16a34a' : score >= 40 ? '#2563eb' : '#d97706';
-  const bg = score >= 70 ? '#dcfce7' : score >= 40 ? '#eff6ff' : '#fef3c7';
-  return <span style={{ background: bg, color, padding: '2px 8px', borderRadius: 100, fontSize: 12, fontWeight: 600 }}>{score}</span>;
-}
-
 function ListingCard({ listing }) {
   const company = listing.company;
-  const score = company?.valuations?.[0]?.startScore;
   const price = listing.askingPricePerShare ? Number(listing.askingPricePerShare).toLocaleString('nb-NO') : 'Åpen';
   const total = listing.askingPricePerShare ? (Number(listing.askingPricePerShare) * listing.sharesForSale).toLocaleString('nb-NO') : '—';
 
   return (
     <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h3 style={{ fontSize: 18, fontWeight: 600 }}>{company?.name || 'Ukjent'}</h3>
-          <p style={{ fontSize: 13, color: 'var(--gray-600)' }}>{company?.industry || 'Ingen bransje'}</p>
-        </div>
-        <ScoreBadge score={score} />
+      <div>
+        <h3 style={{ fontSize: 18, fontWeight: 600 }}>{company?.name || 'Ukjent'}</h3>
+        <p style={{ fontSize: 13, color: 'var(--gray-600)' }}>{company?.industry || 'Ingen bransje'}</p>
       </div>
       <div className="stat-grid">
         <div className="stat-box">

@@ -5,9 +5,11 @@ import Navbar from '../../../components/Navbar';
 import api from '../../../lib/api';
 import { isLoggedIn } from '../../../lib/auth';
 import { calculateFees } from '../../../lib/fees';
+import { useTenant } from '../../../lib/TenantContext';
 
 export default function ListingDetailPage() {
   const { id } = useParams();
+  const tenant = useTenant();
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [bidForm, setBidForm] = useState({ pricePerShare: '', sharesWanted: '', message: '' });
@@ -50,8 +52,7 @@ export default function ListingDetailPage() {
   const company = listing.company;
   const valuation = company?.valuations?.[0];
   const methodology = valuation?.methodology;
-  const score = valuation?.startScore || methodology?.startScore;
-  const scoreColor = score >= 70 ? '#16a34a' : score >= 40 ? '#2563eb' : '#d97706';
+  const hasObservations = !!(methodology?.keyStrengths?.length || methodology?.keyRisks?.length);
 
   return (
     <>
@@ -147,27 +148,23 @@ export default function ListingDetailPage() {
             </div>
           )}
 
-          {/* BreedzScore card */}
-          {score && (
+          {/* BreedzInsights — objective observations from public data */}
+          {hasObservations && (
             <div className="card glow-border" style={{ marginBottom: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 12, background: scoreColor + '15', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 800, color: scoreColor }}>{score}</div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 16 }}>BreedzScore</div>
-                  <div style={{ fontSize: 13, color: 'var(--gray-600)' }}>{score >= 70 ? 'Sterk posisjon' : score >= 40 ? 'God posisjon' : 'Gjennomsnitt'}</div>
-                </div>
-              </div>
-              {methodology?.scoreExplanation && <p style={{ fontSize: 14, color: 'var(--gray-700)', lineHeight: 1.6 }}>{methodology.scoreExplanation}</p>}
-              {methodology?.keyStrengths && (
-                <div style={{ marginTop: 12 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Styrker</div>
-                  {methodology.keyStrengths.map((s, i) => <div key={i} style={{ fontSize: 13, color: 'var(--gray-600)', paddingLeft: 12 }}>+ {s}</div>)}
+              <div style={{ fontFamily: 'var(--font-serif)', fontWeight: 600, fontSize: 18, marginBottom: 4 }}>{tenant.insightsLabel}</div>
+              <p style={{ fontSize: 12, color: 'var(--gray-600)', lineHeight: 1.55, marginBottom: 12 }}>
+                Observasjoner basert på offentlig tilgjengelige data fra Brønnøysundregisteret og årsregnskap. Dette er ikke investeringsrådgivning.
+              </p>
+              {methodology.keyStrengths?.length > 0 && (
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Merknader</div>
+                  {methodology.keyStrengths.map((s, i) => <div key={i} style={{ fontSize: 13, color: 'var(--gray-700)', paddingLeft: 12 }}>• {s}</div>)}
                 </div>
               )}
-              {methodology?.keyRisks && (
-                <div style={{ marginTop: 8 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Risiko</div>
-                  {methodology.keyRisks.map((r, i) => <div key={i} style={{ fontSize: 13, color: 'var(--gray-600)', paddingLeft: 12 }}>- {r}</div>)}
+              {methodology.keyRisks?.length > 0 && (
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Oppmerksomhetspunkter</div>
+                  {methodology.keyRisks.map((r, i) => <div key={i} style={{ fontSize: 13, color: 'var(--gray-700)', paddingLeft: 12 }}>• {r}</div>)}
                 </div>
               )}
             </div>
