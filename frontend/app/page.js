@@ -107,13 +107,31 @@ export default function Home() {
       </section>
 
       {/* CTA band */}
-      <section style={{ background: 'var(--cta-band-bg)', padding: '72px 0' }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: 'clamp(24px, 4.5vw, 36px)', fontWeight: 600, color: 'var(--cta-band-text)', marginBottom: 16 }}>Klar til å handle unoterte aksjer?</h2>
-          <p style={{ color: 'var(--cta-band-muted)', fontSize: 16, marginBottom: 32 }}>Opprett en gratis konto og kom i gang på minutter.</p>
-          <Link href="/auth/register">
-            <button className="btn" style={{ background: 'white', color: 'var(--royal)', padding: '14px 36px', fontSize: 16, fontWeight: 600 }}>Opprett konto</button>
-          </Link>
+      <section className="cta-band" style={{ background: 'var(--cta-band-bg)' }}>
+        {isBreedz && (
+          <>
+            <div className="cta-band-glow-a" aria-hidden />
+            <div className="cta-band-glow-b" aria-hidden />
+          </>
+        )}
+        <div className="container">
+          <div className={`cta-band-inner${isBreedz ? ' glow-border' : ''}`}>
+            {isBreedz && (
+              <span className="cta-pill">
+                <span className="cta-pill-spark" aria-hidden>✦</span> Start på 30 sekunder
+              </span>
+            )}
+            <h2 style={{ fontSize: 'clamp(26px, 4.8vw, 40px)', fontWeight: 600, color: 'var(--cta-band-text)', marginBottom: 16, lineHeight: 1.15, letterSpacing: '-0.01em' }}>
+              Klar til å handle{' '}
+              <span className="cta-headline-accent">unoterte aksjer?</span>
+            </h2>
+            <p style={{ color: 'var(--cta-band-muted)', fontSize: 16, marginBottom: 32, maxWidth: 520, margin: '0 auto 32px' }}>
+              Opprett en gratis konto og kom i gang på minutter.
+            </p>
+            <Link href="/auth/register">
+              <button className="cta-btn">Opprett konto</button>
+            </Link>
+          </div>
         </div>
       </section>
 
