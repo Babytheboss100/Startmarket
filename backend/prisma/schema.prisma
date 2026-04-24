@@ -59,21 +59,54 @@ enum DocType {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  fullName     String
-  phone        String?
-  bankIdPid    String?   @unique
-  googleId     String?   @unique
-  passwordHash String?
-  kycStatus    KycStatus @default(PENDING)
-  role         UserRole  @default(USER)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  listings     Listing[]
-  bids         Bid[]
-  dealMembers  DealRoomMember[]
-  messages     DealRoomMessage[]
+  id            String    @id @default(uuid())
+  email         String    @unique
+  fullName      String
+  phone         String?
+  bankIdPid     String?   @unique
+  googleId      String?   @unique
+  googleProfile Json?
+  avatarUrl     String?
+  authProvider  String    @default("email")
+  passwordHash  String?
+  kycStatus     KycStatus @default(PENDING)
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  listings      Listing[]
+  bids          Bid[]
+  dealMembers   DealRoomMember[]
+  messages      DealRoomMessage[]
+  loginEvents   LoginEvent[]
+}
+
+model LoginEvent {
+  id                String   @id @default(uuid())
+  userId            String?
+  email             String?
+  provider          String   // 'google' | 'email'
+  eventType         String   // 'login_success' | 'login_failure' | 'logout' | 'register'
+  success           Boolean
+  failureReason     String?
+  ipAddress         String?
+  userAgent         String?  @db.Text
+  country           String?  // ISO 3166-1 alpha-2
+  tenantId          String?
+  googleProfile     Json?
+  referer           String?  @db.Text
+  utmSource         String?
+  utmMedium         String?
+  utmCampaign       String?
+  deviceFingerprint String?
+  createdAt         DateTime @default(now())
+  user              User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([email])
+  @@index([createdAt])
+  @@index([provider])
+  @@index([tenantId])
+  @@index([success, createdAt])
 }
 
 model Company {

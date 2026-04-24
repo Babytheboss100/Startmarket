@@ -15,6 +15,7 @@ app.use(session({
   cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
+app.use('/auth',           require('./routes/auth-google'));
 app.use('/auth',           require('./routes/auth'));
 app.use('/api/users',      require('./routes/users'));
 app.use('/api/companies',  require('./routes/companies'));

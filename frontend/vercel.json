@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/auth/google/callback",
+      "destination": "https://api.startmarket.no/auth/google/callback"
+    }
+  ]
+}
